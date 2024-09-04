@@ -9,6 +9,7 @@ class ShortUrl
     {
         $this->dbFile = $dbFile;
         $this->db = new SQLite3($this->dbFile);
+        $this->db->busyTimeout(5000);
         $this->initDatabase();
     }
 
