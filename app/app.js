@@ -99,7 +99,7 @@ app.component('app-home', {
             let passwordNotice = true;
             let count = this.items.length;
             this.items.forEach((v, k) => {
-                fetch(`api/shortURL.php?title=${encodeURI(v.subject)}&url=${encodeURI(v.url)}&password=${localStorage.shortURLPassword}`)
+                fetch(`api/goodurl.php?title=${encodeURI(v.subject)}&url=${encodeURI(v.url)}&password=${localStorage.shortURLPassword}`)
                     .then(response => response.json())
                     .then(data => {
                         if (403 === data.code) {
