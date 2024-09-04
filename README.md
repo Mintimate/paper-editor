@@ -4,7 +4,18 @@
 
 ## 安装说明
 
-请将 `.env-example` 重命名为 `.env`，并根据需要修改配置
+- 请将 `.env-example` 重命名为 `.env`，并根据需要修改配置
+
+- Nginx 伪静态配置
+
+```nginx
+location ~* \.(db|env)$ {
+    return 403;
+}
+if (!-e $request_filename) {
+    rewrite ^/(\w+)$ /api/goodurl.php?url=$1 last;
+}
+```
 
 ## 维护人员
 
