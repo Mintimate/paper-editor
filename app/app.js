@@ -107,19 +107,21 @@ app.component('app-home', {
                             passwordNotice && alert(data.msg);
                             passwordNotice = false;
                             return false;
-                        } else if (1 === data.code) {
-                            alert(data.msg);
-                        } else {
-                            this.items[k].url = data.url;
-
                         }
+                        if (data.code > 0) {
+                            alert(data.msg);
+                            return false;
+                        }
+                        this.items[k].url = data.url;
                     })
                     .catch(err => {
                         console.log(err);
                     })
                     .finally(() => {
                         count--;
-                        if (0 === count) this.pagerRender();
+                        if (0 === count) {
+                            this.pagerRender();
+                        }
                     });
             })
         }

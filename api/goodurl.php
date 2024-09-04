@@ -22,6 +22,11 @@ if (isset($config['password'])) {
     }
 }
 
+// 验证短链
+if (stripos($url, $config['base_url']) === 0) {
+    exit(json_encode(['code' => 401, 'msg' => '请勿输入短链接'], JSON_UNESCAPED_UNICODE));
+}
+
 // 创建短链接
 $shortUrl = $config['base_url'] . $ss->createShortUrl($url, htmlspecialchars($_GET['title']));
 exit(json_encode(['code' => 0, 'msg' => '创建成功', 'url' => $shortUrl], JSON_UNESCAPED_UNICODE));

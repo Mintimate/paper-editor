@@ -24,7 +24,7 @@ class ShortUrl
         }
         // 如果长链接不存在，生成新的短链接
         $shortUrl = $this->generateShortUrl();
-        $insertQuery = $this->db->prepare('INSERT INTO urls (short_url, long_url, title) VALUES (?, ?, ?)');
+        $insertQuery = $this->db->prepare('INSERT INTO urls (short_url, long_url, title, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)');
         $insertQuery->bindValue(1, $shortUrl, SQLITE3_TEXT);
         $insertQuery->bindValue(2, $longUrl, SQLITE3_TEXT);
         $insertQuery->bindValue(3, $title, SQLITE3_TEXT);
@@ -34,7 +34,7 @@ class ShortUrl
 
     public function redirectUrl($shortUrl)
     {
-        $query = $this->db->prepare('SELECT long_url, visits, title FROM urls WHERE short_url=?');
+        $query = $this->db->prepare('SELECT long_url, visits, title, created_at FROM urls WHERE short_url=?');
         $query->bindValue(1, $shortUrl, SQLITE3_TEXT);
         $result = $query->execute();
         if (!$row = $result->fetchArray()) {
@@ -87,7 +87,7 @@ class ShortUrl
     private function initDatabase()
     {
         if (!$this->tableExists('urls')) {
-            $this->db->exec('CREATE TABLE urls (id INTEGER PRIMARY KEY AUTOINCREMENT, short_url TEXT UNIQUE, long_url TEXT, title TEXT, visits INTEGER DEFAULT 0)');
+            $this->db->exec('CREATE TABLE urls (id INTEGER PRIMARY KEY AUTOINCREMENT, short_url TEXT UNIQUE, long_url TEXT, title TEXT, visits INTEGER DEFAULT 0, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)');
         }
 
         if (!$this->tableExists('logs')) {
