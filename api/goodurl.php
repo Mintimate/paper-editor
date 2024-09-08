@@ -24,7 +24,8 @@ $config = parse_ini_file(__DIR__ . '/../.env', true);
 if (isset($config['password'])) {
     if (empty($_GET['password'])) {
         jsonExit(['code' => 403, 'msg' => '密码不能为空']);
-    } elseif ($config['password'] != $_GET['password']) {
+    }
+    if ($config['password'] != $_GET['password']) {
         jsonExit(['code' => 403, 'msg' => '密码错误']);
     }
 }

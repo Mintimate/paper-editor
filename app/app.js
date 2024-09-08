@@ -99,6 +99,9 @@ app.component('app-home', {
             let passwordNotice = true;
             let count = this.items.length;
             this.items.forEach((v, k) => {
+                if (v.url.includes(location.hostname)) {
+                    return false;
+                }
                 fetch(`api/goodurl.php?act=create&url=${encodeURI(v.url)}&title=${encodeURI(v.subject)}&password=${localStorage.shortURLPassword}`)
                     .then(response => response.json())
                     .then(data => {
@@ -166,7 +169,7 @@ app.component('app-home', {
                                     正在获取
                                 </button>
                                 <button class="btn btn-primary ms-3" @click="getArticles()" v-else>生成早报</button>
-                                <button class="btn btn-primary ms-3" @click="getShortURL()">转换短链</button>
+                                <button class="btn btn-primary ms-3" :disabled="!items || items.length < 4" @click="getShortURL()">转换短链</button>
                             </div>
                         </div>
                     </div>
