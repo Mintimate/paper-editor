@@ -1,32 +1,47 @@
 <?php
 
+$url = $_GET['url'] ?? '';
+$act = $_GET['act'] ?? 'redirect';
+
 require_once __DIR__ . '/class/ShortUrl.php';
-
 $ss = new ShortUrl(__DIR__ . '/goodurl.db');
-$url = filter_var($_GET['url'], FILTER_SANITIZE_URL);
 
-if (!filter_var($url, FILTER_VALIDATE_URL)) {
+// 重定向
+if ($act == 'redirect') {
     $ss->redirectUrl($url);
     exit;
 }
 
-header('Content-Type: application/json; charset=utf-8');
+// 输出json
+function jsonExit($data)
+{
+    header('Content-Type: application/json; charset=utf-8');
+    exit(json_encode($data, JSON_UNESCAPED_UNICODE));
+}
 
 // 验证密码
 $config = parse_ini_file(__DIR__ . '/../.env', true);
 if (isset($config['password'])) {
     if (empty($_GET['password'])) {
-        exit(json_encode(['code' => 403, 'msg' => '密码不能为空'], JSON_UNESCAPED_UNICODE));
+        jsonExit(['code' => 403, 'msg' => '密码不能为空']);
     } elseif ($config['password'] != $_GET['password']) {
-        exit(json_encode(['code' => 403, 'msg' => '密码错误'], JSON_UNESCAPED_UNICODE));
+        jsonExit(['code' => 403, 'msg' => '密码错误']);
     }
 }
 
-// 验证短链
-if (stripos($url, $config['base_url']) === 0) {
-    exit(json_encode(['code' => 401, 'msg' => '请勿输入短链接'], JSON_UNESCAPED_UNICODE));
+// 统计短链
+if ($act == 'daily') {
+    jsonExit($ss->dailyStatistics($url));
 }
 
-// 创建短链接
-$shortUrl = $config['base_url'] . $ss->createShortUrl($url, htmlspecialchars($_GET['title']));
-exit(json_encode(['code' => 0, 'msg' => '创建成功', 'url' => $shortUrl], JSON_UNESCAPED_UNICODE));
+// 创建短链
+if ($act == 'create') {
+    if (!filter_var($url, FILTER_VALIDATE_URL)) {
+        jsonExit(['code' => 401, 'msg' => '链接格式错误']);
+    }
+    if (stripos($url, $config['base_url']) === 0) {
+        jsonExit(['code' => 401, 'msg' => '请勿输入短链接']);
+    }
+    $shortUrl = $config['base_url'] . $ss->createShortUrl($url, htmlspecialchars($_GET['title']));
+    jsonExit(['code' => 0, 'msg' => '创建成功', 'url' => $shortUrl]);
+}

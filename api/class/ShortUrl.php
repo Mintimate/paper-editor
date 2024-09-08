@@ -61,6 +61,18 @@ class ShortUrl
         exit;
     }
 
+    public function dailyStatistics($shortUrl)
+    {
+        $query = $this->db->prepare('SELECT DATE(visit_time) AS day, COUNT(*) AS visits FROM logs WHERE short_url=? GROUP BY day ORDER BY day');
+        $query->bindValue(1, $shortUrl, SQLITE3_TEXT);
+        $result = $query->execute();
+        $statistics = [];
+        while ($row = $result->fetchArray()) {
+            $statistics[$row['day']] = $row['visits'];
+        }
+        return $statistics;
+    }
+
     private function generateShortUrl()
     {
         $alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
