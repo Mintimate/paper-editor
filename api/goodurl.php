@@ -29,6 +29,11 @@ if (isset($config['password'])) {
     }
 }
 
+// 所有短链
+if ($act == 'list') {
+    jsonExit($ss->getShortUrls());
+}
+
 // 统计短链
 if ($act == 'daily') {
     jsonExit($ss->dailyStatistics($url));

@@ -13,6 +13,16 @@ class ShortUrl
         $this->initDatabase();
     }
 
+    public function getShortUrls()
+    {
+        $urls = [];
+        $result = $this->db->query('SELECT * FROM urls ORDER BY id DESC LIMIT 100');
+        while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+            $urls[] = $row;
+        }
+        return $urls;
+    }
+
     public function createShortUrl($longUrl, $title = '')
     {
         // 如果长链接已经存在，返回对应的短链接
@@ -34,7 +44,7 @@ class ShortUrl
 
     public function redirectUrl($shortUrl)
     {
-        $query = $this->db->prepare('SELECT long_url, visits, title, created_at FROM urls WHERE short_url=?');
+        $query = $this->db->prepare('SELECT * FROM urls WHERE short_url=?');
         $query->bindValue(1, $shortUrl, SQLITE3_TEXT);
         $result = $query->execute();
         if (!$row = $result->fetchArray()) {
@@ -99,11 +109,28 @@ class ShortUrl
     private function initDatabase()
     {
         if (!$this->tableExists('urls')) {
-            $this->db->exec('CREATE TABLE urls (id INTEGER PRIMARY KEY AUTOINCREMENT, short_url TEXT UNIQUE, long_url TEXT, title TEXT, visits INTEGER DEFAULT 0, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)');
+            $this->db->exec('
+                CREATE TABLE urls (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    short_url TEXT UNIQUE,
+                    long_url TEXT,
+                    title TEXT,
+                    visits INTEGER DEFAULT 0,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                )
+            ');
         }
 
         if (!$this->tableExists('logs')) {
-            $this->db->exec('CREATE TABLE logs (id INTEGER PRIMARY KEY AUTOINCREMENT, short_url TEXT, visit_time DATETIME DEFAULT CURRENT_TIMESTAMP, user_agent TEXT, ip_address TEXT)');
+            $this->db->exec('
+                CREATE TABLE logs (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    short_url TEXT,
+                    visit_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    user_agent TEXT,
+                    ip_address TEXT
+                )
+            ');
         }
     }
 
