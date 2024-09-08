@@ -3,7 +3,7 @@ const app = Vue.createApp({});
 app.component('app-home', {
     data() {
         let paper = `
-            腾讯云技术早报 【${this.getDate()}】
+            腾讯云TDP 早报 【${this.getDate()}】
 
             * 科技热点
             1．{SUBJECT-0}
