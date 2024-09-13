@@ -19,12 +19,19 @@ app.component('app-home', {
         `;
         paper = paper.trim().replace(/\n +/g, '\n');
         return {
+            // 早报内容项目
             items: null,
+            // 早报输出内容
             paper: paper,
             message: paper.replace(/\{.+\}/g, ''),
+            // 早报拉取状态
             pulling: false,
+            // 早报的URL
             pullURL: ['', '', '', ''],
-            pullMsg: null
+            // 早报的拉取提示信息
+            pullMsg: null,
+            // 数据统计 - 早报历史数据
+            reportItems: null,
         };
     },
     watch: {
@@ -34,6 +41,11 @@ app.component('app-home', {
         }
     },
     methods: {
+        checkPassword(){
+            if (!localStorage.shortURLPassword) {
+                localStorage.shortURLPassword = prompt('请输入密码');
+            }
+        },
         getDate() {
             const now = new Date();
             const day = now.getDay();
@@ -72,6 +84,20 @@ app.component('app-home', {
                 allLinks.push(item.url);
             });
         },
+        /** 获取近期的文章统计 */
+        getRecentReport(){
+            if (!localStorage.shortURLPassword) {
+                localStorage.shortURLPassword = prompt('请输入密码');
+            }
+            // @Todo: 需要修改为真实地址
+            fetch(`api/all?act=list&${localStorage.shortURLPassword}`)
+            // fetch(`/paper-editor/testData/reportData.json?act=list&${localStorage.shortURLPassword}`)
+                .then(res => res.json())
+                .then(data => {
+                    this.reportItems = data;
+                })
+        },
+        /** 获取文章的数据 */
         getArticles() {
             this.pulling = true;
             this.pullMsg = null;
@@ -164,6 +190,7 @@ app.component('app-home', {
                                 <input type="text" class="form-control" placeholder="云+社区文章 URL2" v-model="pullURL[3]">
                             </div>
                             <div class="text-end">
+                                <button class="btn btn-primary ms-3" @click="getRecentReport()">近期数据</button>
                                 <button class="btn btn-primary ms-3" disabled v-if="pulling">
                                     <span class="spinner-border spinner-border-sm"></span>
                                     正在获取
@@ -198,7 +225,39 @@ app.component('app-home', {
                 </div>
             </div>
         </div>
-        <div class="mt-3"></div>
+        <div class="container-xxl mt-3">
+            <div class="card" v-if="reportItems !== null">
+                <div class="card-header">
+                            近期数据
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                       <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>短链接</th>
+                                    <th>标题</th>
+                                    <th>访问量</th>
+                                    <th>创建时间</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="reportItem in reportItems" :key="reportItem.id">
+                                    <td>
+                                        <a :href="'https://e.tdp.fan/'+reportItem.short_url" target="_blank">
+                                        https://e.tdp.fan/{{reportItem.short_url}}
+                                        </a>
+                                    </td>
+                                    <td>{{reportItem.title}}</td>
+                                    <td>{{reportItem.visits}}</td>
+                                    <td>{{reportItem.created_at}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                     </div>
+                  </div>
+            </div>
+        </div>
     `
 });
 
